@@ -1,4 +1,4 @@
-# Simple Audio Effects Processor
+# Digital Pedal Board: Simple Audio Effects Processor
 
 A lightweight C audio effects processor for adding echo/delay effects to MP3 files.
 

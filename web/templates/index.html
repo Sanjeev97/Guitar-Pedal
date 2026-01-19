@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎸 Guitar Pedal - Audio Effects Processor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎸 Guitar Pedal</h1>
+            <p class="subtitle">Digital Audio Effects Processor</p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- File Upload Section -->
+            <section class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">🎵</div>
+                    <h3>Drop your audio file here</h3>
+                    <p>or click to browse</p>
+                    <p class="file-types">Supports: MP3, WAV, OGG, M4A</p>
+                    <input type="file" id="fileInput" accept=".mp3,.wav,.ogg,.m4a" hidden>
+                </div>
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <span class="file-name" id="fileName"></span>
+                    <button class="btn-remove" id="removeFile">✕</button>
+                </div>
+            </section>
+
+            <!-- Effect Controls Section -->
+            <section class="controls-section">
+                <h2>Effect Parameters</h2>
+                
+                <!-- Presets -->
+                <div class="preset-section">
+                    <label for="presetSelect">Presets:</label>
+                    <select id="presetSelect">
+                        <option value="">Custom</option>
+                        <option value="slapback">Slapback Delay</option>
+                        <option value="standard">Standard Echo</option>
+                        <option value="ambient">Ambient Echo</option>
+                        <option value="chorus">Chorus Effect</option>
+                        <option value="tape">Tape Echo</option>
+                    </select>
+                </div>
+
+                <!-- Control Knobs -->
+                <div class="knobs-container">
+                    <!-- Delay Time (Pot 1) -->
+                    <div class="knob-wrapper">
+                        <div class="knob-label">Delay Time</div>
+                        <div class="knob" id="knob1">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                        <div class="knob-value" id="value1">300ms</div>
+                        <input type="range" class="knob-slider" id="pot1" min="0" max="100" value="30">
+                        <div class="knob-range">0ms - 1000ms</div>
+                    </div>
+
+                    <!-- Pot 2 (Unused) -->
+                    <div class="knob-wrapper disabled">
+                        <div class="knob-label">Pot 2 (Unused)</div>
+                        <div class="knob" id="knob2">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                        <div class="knob-value" id="value2">0</div>
+                        <input type="range" class="knob-slider" id="pot2" min="0" max="100" value="0" disabled>
+                        <div class="knob-range">Reserved</div>
+                    </div>
+
+                    <!-- LFO Depth (Pot 3) -->
+                    <div class="knob-wrapper">
+                        <div class="knob-label">LFO Modulation</div>
+                        <div class="knob" id="knob3">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                        <div class="knob-value" id="value3">0ms</div>
+                        <input type="range" class="knob-slider" id="pot3" min="0" max="100" value="0">
+                        <div class="knob-range">0ms - 4ms</div>
+                    </div>
+
+                    <!-- Feedback (Pot 4) -->
+                    <div class="knob-wrapper">
+                        <div class="knob-label">Feedback</div>
+                        <div class="knob" id="knob4">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                        <div class="knob-value" id="value4">50%</div>
+                        <input type="range" class="knob-slider" id="pot4" min="0" max="100" value="50">
+                        <div class="knob-range">0% - 100%</div>
+                    </div>
+                </div>
+
+                <!-- Process Button -->
+                <button class="btn-primary btn-process" id="processBtn" disabled>
+                    Process Audio
+                </button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <h2>Results</h2>
+                
+                <div class="audio-players">
+                    <!-- Original Audio -->
+                    <div class="audio-player-wrapper">
+                        <h3>Original</h3>
+                        <audio id="originalAudio" controls></audio>
+                    </div>
+
+                    <!-- Processed Audio -->
+                    <div class="audio-player-wrapper">
+                        <h3>Processed</h3>
+                        <audio id="processedAudio" controls></audio>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" id="downloadBtn">
+                        ⬇ Download Processed Audio
+                    </button>
+                    <button class="btn-secondary" id="newProcessBtn">
+                        🔄 Process New File
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing your audio...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <span class="error-text" id="errorText"></span>
+                <button class="btn-close" id="closeError">✕</button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>Built on top of Linus Torvalds' AudioNoise toolkit</p>
+            <p class="tech-info">48kHz • 32-bit • Real-time DSP</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+

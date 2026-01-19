@@ -1,0 +1,49 @@
+# Git attributes for Guitar Pedal repository
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.c text
+*.h text
+*.py text
+*.js text
+*.css text
+*.html text
+*.md text
+
+# Scripts
+*.sh text eol=lf
+
+# Configuration files
+*.json text
+*.yml text
+*.yaml text
+*.toml text
+*.ini text
+Makefile text
+
+# Binary files
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.m4a binary
+*.raw binary
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+
+# Exclude files from export
+.gitignore export-ignore
+.gitattributes export-ignore
+.DS_Store export-ignore
+

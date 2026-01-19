@@ -2,10 +2,53 @@
 
 A lightweight C audio effects processor for adding echo/delay effects to MP3 files.
 
+## 🎨 NEW: Web Interface Available!
+
+**Want an easier way to use this?** We now have a beautiful web interface with drag-and-drop file upload, visual knobs, and presets!
+
+### ⚡ ONE-COMMAND Setup (Recommended!)
+
+```bash
+./scripts/setup_and_run.sh
+```
+
+This automatically:
+- ✅ Builds everything
+- ✅ Installs dependencies
+- ✅ Starts the server
+- ✅ **Opens your browser!**
+
+📖 See **[docs/SETUP_INSTRUCTIONS.md](docs/SETUP_INSTRUCTIONS.md)** for details.
+
+### Alternative: Manual Start
+
+If already set up:
+```bash
+./scripts/start_server.sh
+```
+
+📖 See **[docs/FRONTEND_SETUP.md](docs/FRONTEND_SETUP.md)** for detailed frontend documentation.
+
+---
+
+## 📁 **NEW: Organized Repository Structure!**
+
+The repository is now cleanly organized:
+- `src/` - C audio processor source code
+- `web/` - Flask web application
+- `scripts/` - Setup and utility scripts
+- `docs/` - All documentation
+- `examples/` - Sample audio files
+
+📖 See **[DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)** for complete details.
+
+---
+
 ## Requirements
 
 - GCC or Clang compiler
 - **ffmpeg** (for MP3 conversion)
+- **Python 3.7+** (for web interface only)
 
 ### Installing Dependencies
 
@@ -136,16 +179,38 @@ ffmpeg -v fatal -f s32le -ar 48000 -ac 1 -i output.raw -q:a 0 output.mp3
 ## Project Structure
 
 ```
-.
-├── Makefile       # Build automation
-├── convert.c      # Main program - audio processing loop
-├── echo.h         # Echo/delay effect implementation
-├── effects.h      # Shared effect state and utilities
-├── lfo.h          # Low frequency oscillator
-├── util.h         # Math helpers, delay buffer
-├── gensin.c       # Generates sine lookup table
-└── gensin.h       # Pre-computed quarter-wave sine table
+Guitar-Pedal/
+├── 📄 Readme.md                  # You are here
+├── 📄 Makefile                   # Build system
+├── 📄 DIRECTORY_STRUCTURE.md     # Complete structure guide
+│
+├── 📁 src/                       # C Audio Processor
+│   ├── convert.c                 # Main processing program
+│   ├── echo.h                    # Echo effect
+│   ├── effects.h                 # Effect framework
+│   ├── lfo.h                     # Oscillator
+│   └── util.h                    # Utilities
+│
+├── 📁 web/                       # Web Frontend
+│   ├── app.py                    # Flask server
+│   ├── requirements.txt          # Dependencies
+│   ├── templates/index.html      # UI
+│   └── static/                   # CSS & JS
+│
+├── 📁 scripts/                   # Automation
+│   ├── setup_and_run.sh          # One-command setup
+│   └── start_server.sh           # Quick start
+│
+├── 📁 docs/                      # Documentation
+│   ├── QUICK_START.md
+│   ├── SETUP_INSTRUCTIONS.md
+│   ├── TROUBLESHOOTING.md
+│   └── (more...)
+│
+└── 📁 examples/                  # Sample audio files
 ```
+
+📖 **Full structure**: See [DIRECTORY_STRUCTURE.md](DIRECTORY_STRUCTURE.md)
 
 ## Building
 

@@ -5,6 +5,8 @@ A lightweight C audio effects processor for adding echo/delay effects to MP3 fil
 ## 🎨 NEW: Web Interface Available!
 
 **Want an easier way to use this?** We now have a beautiful web interface with drag-and-drop file upload, visual knobs, and presets!
+<img width="734" height="709" alt="image" src="https://github.com/user-attachments/assets/aed5547c-20c2-49bd-ba67-f801f62e9e5d" />
+
 
 ### ⚡ ONE-COMMAND Setup (Recommended!)
 

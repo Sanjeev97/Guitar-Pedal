@@ -1,4 +1,4 @@
-# Simple Audio Effects Processor
+# AudioNoise - Simple Audio Effects Processor
 
 A lightweight C audio effects processor for adding echo/delay effects to MP3 files.
 
@@ -25,7 +25,7 @@ sudo apt install ffmpeg gcc
 ### Step 1: Build the program
 
 ```bash
-gcc -O2 -o convert convert.c -lm
+make
 ```
 
 ### Step 2: Convert MP3 to raw audio
@@ -137,6 +137,7 @@ ffmpeg -v fatal -f s32le -ar 48000 -ac 1 -i output.raw -q:a 0 output.mp3
 
 ```
 .
+├── Makefile       # Build automation
 ├── convert.c      # Main program - audio processing loop
 ├── echo.h         # Echo/delay effect implementation
 ├── effects.h      # Shared effect state and utilities
@@ -146,20 +147,25 @@ ffmpeg -v fatal -f s32le -ar 48000 -ac 1 -i output.raw -q:a 0 output.mp3
 └── gensin.h       # Pre-computed quarter-wave sine table
 ```
 
-## Building (Advanced)
+## Building
 
-### With Optimizations
+### Build the program
 
 ```bash
-gcc -O3 -march=native -o convert convert.c -lm
+make
 ```
 
-### Regenerate Sine Table (optional)
+### Clean up (remove executable)
 
 ```bash
-gcc -o gensin gensin.c -lm
-./gensin > gensin.h
-gcc -O2 -o convert convert.c -lm
+make clean
+```
+
+### Rebuild from scratch
+
+```bash
+make clean
+make
 ```
 
 ## Troubleshooting

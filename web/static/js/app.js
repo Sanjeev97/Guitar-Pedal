@@ -144,6 +144,12 @@ function setupKnobs() {
             updateKnob(knob);
             // Reset preset selection to "Custom"
             elements.presetSelect.value = '';
+            
+            // If we have an active session, show "Reprocess" button
+            if (state.sessionId) {
+                elements.processBtn.textContent = '🔄 Reprocess with New Settings';
+                elements.processBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            }
         });
         
         // Initialize
@@ -209,6 +215,12 @@ function applyPreset(preset) {
     updateKnob({ slider: elements.pot2, knob: elements.knob2, value: elements.value2, format: formatGeneric });
     updateKnob({ slider: elements.pot3, knob: elements.knob3, value: elements.value3, format: formatLFO });
     updateKnob({ slider: elements.pot4, knob: elements.knob4, value: elements.value4, format: formatFeedback });
+    
+    // If we have an active session, show "Reprocess" button
+    if (state.sessionId) {
+        elements.processBtn.textContent = '🔄 Reprocess with Preset';
+        elements.processBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+    }
 }
 
 // Button Setup
@@ -219,9 +231,9 @@ function setupButtons() {
     elements.closeError.addEventListener('click', hideError);
 }
 
-// Process Audio
+// Process Audio (New: Upload once, process multiple times)
 async function processAudio() {
-    if (!state.selectedFile) {
+    if (!state.selectedFile && !state.sessionId) {
         showError('Please select a file first');
         return;
     }
@@ -230,37 +242,68 @@ async function processAudio() {
     elements.loadingOverlay.style.display = 'flex';
     
     try {
-        // Prepare form data
-        const formData = new FormData();
-        formData.append('file', state.selectedFile);
-        formData.append('effect', 'echo');
-        formData.append('pot1', (elements.pot1.value / 100).toFixed(3));
-        formData.append('pot2', (elements.pot2.value / 100).toFixed(3));
-        formData.append('pot3', (elements.pot3.value / 100).toFixed(3));
-        formData.append('pot4', (elements.pot4.value / 100).toFixed(3));
-        
-        // Upload and process
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(result.error || 'Processing failed');
+        // Step 1: Upload file if not already uploaded
+        if (!state.sessionId) {
+            const formData = new FormData();
+            formData.append('file', state.selectedFile);
+            
+            const uploadResponse = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const uploadResult = await uploadResponse.json();
+            
+            if (!uploadResponse.ok) {
+                throw new Error(uploadResult.error || 'Upload failed');
+            }
+            
+            // Store session ID for reprocessing
+            state.sessionId = uploadResult.session_id;
+            
+            // Set up original audio player (only once)
+            elements.originalAudio.src = `/play/${state.sessionId}/original`;
         }
         
-        // Store session ID
-        state.sessionId = result.session_id;
+        // Step 2: Process with current parameters (can be done multiple times!)
+        const processResponse = await fetch(`/process/${state.sessionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                effect: 'echo',
+                pot1: (elements.pot1.value / 100).toFixed(3),
+                pot2: (elements.pot2.value / 100).toFixed(3),
+                pot3: (elements.pot3.value / 100).toFixed(3),
+                pot4: (elements.pot4.value / 100).toFixed(3)
+            })
+        });
         
-        // Set up audio players
-        elements.originalAudio.src = `/play/${state.sessionId}/original`;
-        elements.processedAudio.src = `/play/${state.sessionId}/processed`;
+        const processResult = await processResponse.json();
+        
+        if (!processResponse.ok) {
+            throw new Error(processResult.error || 'Processing failed');
+        }
+        
+        // Update processed audio player with new result
+        // Add timestamp to force reload
+        elements.processedAudio.src = `/play/${state.sessionId}/processed?t=${Date.now()}`;
         
         // Show results
         elements.resultsSection.style.display = 'block';
         elements.resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+        // Update button text to show success
+        elements.processBtn.textContent = '✅ Processed! Adjust knobs to reprocess';
+        elements.processBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        
+        // Auto-play the processed audio so user can hear the changes
+        setTimeout(() => {
+            elements.processedAudio.play().catch(() => {
+                // Ignore if autoplay is blocked by browser
+            });
+        }, 300);
         
     } catch (error) {
         showError(error.message);
@@ -289,6 +332,9 @@ function resetForNewProcess() {
     
     resetFileUpload();
     state.sessionId = null;
+    
+    // Reset button text
+    elements.processBtn.textContent = 'Process Audio';
 }
 
 // Error Handling

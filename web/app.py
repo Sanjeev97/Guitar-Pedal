@@ -72,7 +72,7 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    """Handle file upload and processing"""
+    """Handle file upload and convert to raw (cached for real-time processing)"""
     try:
         # Check if file was uploaded
         if 'file' not in request.files:
@@ -94,41 +94,62 @@ def upload_file():
         input_file = UPLOAD_FOLDER / f'{session_id}_input.{original_ext}'
         file.save(input_file)
         
-        # Get effect parameters
-        effect = request.form.get('effect', 'echo')
-        pot1 = float(request.form.get('pot1', 0.3))
-        pot2 = float(request.form.get('pot2', 0.0))
-        pot3 = float(request.form.get('pot3', 0.0))
-        pot4 = float(request.form.get('pot4', 0.5))
+        # Convert input to raw (CACHE THIS - will be reused for real-time processing)
+        input_raw = UPLOAD_FOLDER / f'{session_id}_input.raw'
+        convert_to_raw(input_file, input_raw)
+        
+        return jsonify({
+            'success': True,
+            'session_id': session_id,
+            'original_file': str(input_file.name),
+            'message': 'File uploaded and ready for processing'
+        })
+    
+    except subprocess.CalledProcessError as e:
+        return jsonify({'error': f'Processing error: {str(e)}'}), 500
+    except Exception as e:
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+@app.route('/process/<session_id>', methods=['POST'])
+def process_audio(session_id):
+    """Process audio with given parameters (uses cached raw file)"""
+    try:
+        # Get effect parameters from request
+        data = request.get_json()
+        effect = data.get('effect', 'echo')
+        pot1 = float(data.get('pot1', 0.3))
+        pot2 = float(data.get('pot2', 0.0))
+        pot3 = float(data.get('pot3', 0.0))
+        pot4 = float(data.get('pot4', 0.5))
         
         # Validate parameters (0.0 to 1.0)
         for pot in [pot1, pot2, pot3, pot4]:
             if not (0.0 <= pot <= 1.0):
                 return jsonify({'error': 'Parameters must be between 0.0 and 1.0'}), 400
         
-        # Process audio
+        # Use cached raw file
         input_raw = UPLOAD_FOLDER / f'{session_id}_input.raw'
+        if not input_raw.exists():
+            return jsonify({'error': 'Session expired or file not found. Please upload again.'}), 404
+        
+        # Process audio
         output_raw = OUTPUT_FOLDER / f'{session_id}_output.raw'
         output_file = OUTPUT_FOLDER / f'{session_id}_output.mp3'
         
-        # Convert input to raw
-        convert_to_raw(input_file, input_raw)
-        
-        # Apply effect
+        # Apply effect (fast because raw file is already converted)
         apply_effect(input_raw, output_raw, effect, pot1, pot2, pot3, pot4)
         
         # Convert output to MP3
         convert_to_mp3(output_raw, output_file)
         
-        # Clean up raw files
-        input_raw.unlink()
+        # Clean up output raw file (but keep input raw for re-processing!)
         output_raw.unlink()
         
         return jsonify({
             'success': True,
             'session_id': session_id,
-            'original_file': str(input_file.name),
             'output_file': str(output_file.name),
+            'play_url': f'/play/{session_id}/processed',
             'download_url': f'/download/{session_id}'
         })
     
@@ -188,6 +209,11 @@ def cleanup(session_id):
             input_file = UPLOAD_FOLDER / f'{session_id}_input.{ext}'
             if input_file.exists():
                 input_file.unlink()
+        
+        # Remove cached raw file
+        input_raw = UPLOAD_FOLDER / f'{session_id}_input.raw'
+        if input_raw.exists():
+            input_raw.unlink()
         
         # Remove output files
         output_file = OUTPUT_FOLDER / f'{session_id}_output.mp3'
